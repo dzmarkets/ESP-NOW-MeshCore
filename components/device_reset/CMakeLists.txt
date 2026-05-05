@@ -1,5 +1,5 @@
 #
-# File Path: Master/components/device_reset/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/components/device_reset/CMakeLists.txt
 # Brief:     CMake build configuration file for device_reset component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.1.0

@@ -1,5 +1,5 @@
 // =============================================================================
-// File Path: Master/main/main.c
+// File Path: ESP-NOW-MeshCore/main/main.c
 // Brief:     Main application entry point for the ESP-NOW flooding mesh node.
 //            This version is optimized for Real-Time performance using an
 //            RTOS Multitasking architecture to separate high-speed sensing

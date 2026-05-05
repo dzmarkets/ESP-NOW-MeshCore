@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/blink_led/include/blink_led.h
+// File Path: ESP-NOW-MeshCore/components/blink_led/include/blink_led.h
 // Brief:     Header file for blink_led component (RGB LED driver).
 //            States: Red = Disconnected, Green = Connected, Blue = Sending/Waiting ACK.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)

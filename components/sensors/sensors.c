@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/sensors/sensors.c
+// File Path: ESP-NOW-MeshCore/components/sensors/sensors.c
 // Brief:     Source file for sensors component.
 //
 

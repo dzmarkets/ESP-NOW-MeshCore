@@ -1,5 +1,5 @@
 #
-# File Path: Master/components/mesh_manager/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/components/mesh_manager/CMakeLists.txt
 # Brief:     CMake build configuration file for mesh_manager component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.1.0

@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/sensors/include/sensors.h
+// File Path: ESP-NOW-MeshCore/components/sensors/include/sensors.h
 // Brief:     Header file for sensors component.
 //
 

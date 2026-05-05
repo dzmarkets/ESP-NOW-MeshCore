@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/espnow_control/espnow_control.c
+// File Path: ESP-NOW-MeshCore/components/espnow_control/espnow_control.c
 // Brief:     Source file for espnow_control component.
 //            Manages WiFi initialisation, ESP-NOW registration, peer tracking,
 //            and dynamic STA ↔ STA+AP role switching required for the mesh.

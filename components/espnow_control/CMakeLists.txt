@@ -1,5 +1,5 @@
 #
-# File Path: Master/components/espnow_control/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/components/espnow_control/CMakeLists.txt
 # Brief:     CMake build configuration file for espnow_control component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.2.0

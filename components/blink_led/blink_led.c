@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/blink_led/blink_led.c
+// File Path: ESP-NOW-MeshCore/components/blink_led/blink_led.c
 // Brief:     Source file for blink_led component (RGB LED driver).
 //            Drives a common-cathode 3-pin RGB LED using three independent GPIO pins.
 //            GPIO pin numbers are centralised in shared_config.h.

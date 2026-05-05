@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/message_processor/message_processor.c
+// File Path: ESP-NOW-MeshCore/components/message_processor/message_processor.c
 // Brief:     Source file for message_processor component.
 //
 //            Packet wire format (binary):

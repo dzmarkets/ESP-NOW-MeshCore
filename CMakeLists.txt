@@ -1,6 +1,6 @@
 #
-# File Path: Master/CMakeLists.txt
-# Brief:     Main project CMake build configuration file for Master project.
+# File Path: ESP-NOW-MeshCore/CMakeLists.txt
+# Brief:     Main project CMake build configuration file for ESP-NOW MeshCore project.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.0.1
 # CreateDate: 2026-04-25
@@ -16,4 +16,4 @@ cmake_minimum_required(VERSION 3.16)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 # Define the project name (Updated)
-project(Master)
+project(ESP-NOW-MeshCore)

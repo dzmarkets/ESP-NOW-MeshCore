@@ -1,5 +1,5 @@
 #
-# File Path: Master/main/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/main/CMakeLists.txt
 # Brief:     CMake build configuration file for main component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.2.2

@@ -1,5 +1,5 @@
 #
-# File Path: Master/components/blink_led/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/components/blink_led/CMakeLists.txt
 # Brief:     CMake build configuration file for blink_led component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.2.0

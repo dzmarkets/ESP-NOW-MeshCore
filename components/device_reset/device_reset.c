@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/device_reset/device_reset.c
+// File Path: ESP-NOW-MeshCore/components/device_reset/device_reset.c
 // Brief:     Source file for the generic Device Reset component.
 //
 

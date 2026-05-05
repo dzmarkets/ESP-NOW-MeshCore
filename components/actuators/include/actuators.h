@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/actuators/include/actuators.h
+// File Path: ESP-NOW-MeshCore/components/actuators/include/actuators.h
 // Brief:     Header file for actuators component.
 //
 

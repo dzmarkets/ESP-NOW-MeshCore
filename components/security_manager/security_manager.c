@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/security_manager/security_manager.c
+// File Path: ESP-NOW-MeshCore/components/security_manager/security_manager.c
 // Brief:     Source file for security_manager component.
 //
 

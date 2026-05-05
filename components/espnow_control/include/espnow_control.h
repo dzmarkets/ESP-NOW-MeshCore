@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/espnow_control/include/espnow_control.h
+// File Path: ESP-NOW-MeshCore/components/espnow_control/include/espnow_control.h
 // Brief:     Header file for espnow_control component.
 //            Manages Wi-Fi (STA / AP mode switching) and ESP-NOW transport layer.
 //

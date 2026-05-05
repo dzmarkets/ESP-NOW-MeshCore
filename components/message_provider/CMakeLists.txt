@@ -1,5 +1,5 @@
 #
-# File Path: Master/components/message_provider/CMakeLists.txt
+# File Path: ESP-NOW-MeshCore/components/message_provider/CMakeLists.txt
 # Brief:     CMake build configuration file for message_provider component.
 # Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
 # Version:   0.2.0

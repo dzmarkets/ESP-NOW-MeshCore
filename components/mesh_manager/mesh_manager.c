@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/mesh_manager/mesh_manager.c
+// File Path: ESP-NOW-MeshCore/components/mesh_manager/mesh_manager.c
 // Brief:     Source file for mesh_manager component.
 //            Manages live peer tracking AND persistent NVS storage of the full
 //            Known Peer List (MAC + Name binary blob) so that the mesh can

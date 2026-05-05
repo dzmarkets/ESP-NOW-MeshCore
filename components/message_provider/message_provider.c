@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/message_provider/message_provider.c
+// File Path: ESP-NOW-MeshCore/components/message_provider/message_provider.c
 // Brief:     Source file for message_provider component.
 //            Builds the outgoing ESP-NOW DATA packet with the typed wire format:
 //            ┌──────────┬──────────────────────────────────────────┐

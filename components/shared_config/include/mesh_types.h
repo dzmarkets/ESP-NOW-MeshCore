@@ -1,5 +1,5 @@
 //
-// File Path: Master/components/shared_config/include/mesh_types.h
+// File Path: ESP-NOW-MeshCore/components/shared_config/include/mesh_types.h
 // Brief:     Shared wire-protocol type definitions used across multiple components.
 //            Separating these here avoids circular component dependencies.
 //
