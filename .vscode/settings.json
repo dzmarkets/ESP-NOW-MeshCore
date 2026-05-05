@@ -1,0 +1,16 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.portWin": "COM5",
+  "idf.currentSetup": "C:\\Espressif\\.espressif\\v5.4.4\\esp-idf",
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s3"
+  },
+  "idf.flashType": "UART",
+  "idf.flashBaudRate": "460800",
+  "clangd.arguments": [
+    "--query-driver=c:\\espressif\\**\\*gcc.exe,C:\\Espressif\\**\\*gcc.exe,C:/Espressif/**/*gcc.exe"
+  ]
+}
