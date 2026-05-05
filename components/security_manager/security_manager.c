@@ -1,6 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/security_manager/security_manager.c
 // Brief:     Source file for security_manager component.
+//            Implements AES-128-CBC encryption/decryption using mbedtls.
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #include "security_manager.h"

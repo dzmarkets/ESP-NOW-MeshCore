@@ -1,6 +1,10 @@
 //
 // File Path: ESP-NOW-MeshCore/components/sensors/include/sensors.h
 // Brief:     Header file for sensors component.
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #ifndef SENSORS_H

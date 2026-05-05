@@ -23,8 +23,9 @@
 //     status, and managing the periodic "heartbeat" or "keepalive" transmissions.
 //
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.6.0 (Modular Mesh Edition)
-// UpdateDate: 2026-05-04
+// Version:   0.6.1 (Status Indicator Edition)
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 // =============================================================================
 
 #include <stdio.h>
@@ -41,7 +42,7 @@
 // Project-specific components
 #include "shared_config.h"    // Centralized constants and GPIO mappings
 #include "espnow_control.h"   // Low-level ESP-NOW radio management
-#include "blink_led.h"        // RGB LED status feedback
+#include "status_indicator.h" // RGB LED status feedback
 #include "message_provider.h" // Logic for creating outgoing packets (signing/seq)
 #include "message_processor.h"// Logic for handling incoming packets (parsing/actuators)
 #include "mesh_manager.h"     // Tracks peer status and device counts
@@ -98,7 +99,7 @@ static bool broadcast_data(const uint8_t *payload, size_t len)
     bool success = false;
     
     // Visually indicate transmission on the status LED
-    blink_led_set_state(LED_STATE_SENDING);
+    status_indicator_set_state(LED_STATE_SENDING);
 
     // Briefly switch to AP+STA or broadcast-ready mode if needed by the driver
     espnow_control_set_ap_mode();
@@ -181,11 +182,11 @@ static void mesh_task(void *pvParameters)
         int online_peers = mesh_manager_get_online_peer_count();
 
         if (online_peers == 0) {
-            blink_led_set_state(LED_STATE_DISCONNECTED); // Red: Alone
+            status_indicator_set_state(LED_STATE_DISCONNECTED); // Red: Alone
         } else if (online_peers >= total_expected && total_expected > 0) {
-            blink_led_set_state(LED_STATE_CONNECTED);    // Green: Full mesh
+            status_indicator_set_state(LED_STATE_CONNECTED);    // Green: Full mesh
         } else {
-            blink_led_set_state(LED_STATE_PARTIAL);      // Blue/Yellow: Partial mesh
+            status_indicator_set_state(LED_STATE_PARTIAL);      // Blue/Yellow: Partial mesh
         }
 
         // 3. Transmission Logic (Decide if we need to send a packet)
@@ -226,7 +227,7 @@ static void mesh_task(void *pvParameters)
 void app_main(void)
 {
     // --- Step 1: Hardware & Component Initialization ---
-    blink_led_configure();     // Setup the RGB Status LED
+    status_indicator_configure();     // Setup the RGB Status LED
     sensors_init();            // Setup GPIOs for inputs (buttons/sensors)
 
     // --- Step 2: Modular Device Reset Check ---

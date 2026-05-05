@@ -1,24 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/message_processor/message_processor.c
 // Brief:     Source file for message_processor component.
-//
-//            Packet wire format (binary):
-//            ┌──────────┬──────────────────────────────────────────────┐
-//            │ Byte 0   │ msg_type_t  (0x01 = DATA, 0x02 = ACK)        │
-//            ├──────────┼──────────────────────────────────────────────┤
-//            │ Bytes 1… │ Payload (encrypted for DATA, MAC for ACK)     │
-//            └──────────┴──────────────────────────────────────────────┘
-//
-//            DATA packet payload (bytes 1…):
-//              [16-byte IV] + [AES-128-CBC ciphertext]  (from security_manager)
-//
-//            ACK packet payload (bytes 1…6):
-//              6-byte MAC of the acknowledging device
-//
+//            Handles decryption, deduplication, and application logic.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
 #include "message_processor.h"

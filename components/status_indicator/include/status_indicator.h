@@ -1,15 +1,15 @@
 //
-// File Path: ESP-NOW-MeshCore/components/blink_led/include/blink_led.h
-// Brief:     Header file for blink_led component (RGB LED driver).
+// File Path: ESP-NOW-MeshCore/components/status_indicator/include/status_indicator.h
+// Brief:     Header file for status_indicator component (RGB LED driver).
 //            States: Red = Disconnected, Green = Connected, Blue = Sending/Waiting ACK.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
-#ifndef BLINK_LED_H
-#define BLINK_LED_H
+#ifndef STATUS_INDICATOR_H
+#define STATUS_INDICATOR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,28 +27,29 @@ typedef enum {
     LED_STATE_CONNECTED,        /**< GREEN – all peers online  */
     LED_STATE_PARTIAL,          /**< GREEN BLINK – some peers offline */
     LED_STATE_SENDING,          /**< BLUE  – TX in progress    */
+    LED_STATE_OFF,              /**< ALL OFF */
 } led_state_t;
 
 /**
  * @brief Configure the RGB LED GPIO pins and set initial state (disconnected/red).
  *        GPIO pin numbers are read from shared_config.h (RGB_LED_*_GPIO).
  */
-void blink_led_configure(void);
+void status_indicator_configure(void);
 
 /**
  * @brief Set the RGB LED to a specific logical state.
  * @param state One of LED_STATE_DISCONNECTED, LED_STATE_CONNECTED, LED_STATE_SENDING.
  */
-void blink_led_set_state(led_state_t state);
+void status_indicator_set_state(led_state_t state);
 
 /**
  * @brief Get the current LED logical state.
  * @return Current led_state_t value.
  */
-led_state_t blink_led_get_state(void);
+led_state_t status_indicator_get_state(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // BLINK_LED_H
+#endif // STATUS_INDICATOR_H

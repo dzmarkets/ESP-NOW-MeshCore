@@ -1,6 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/sensors/sensors.c
 // Brief:     Source file for sensors component.
+//            Handles reading hardware inputs (buttons/simulated sensors).
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #include "sensors.h"

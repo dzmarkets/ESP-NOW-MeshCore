@@ -1,20 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/espnow_control/espnow_control.c
 // Brief:     Source file for espnow_control component.
-//            Manages WiFi initialisation, ESP-NOW registration, peer tracking,
-//            and dynamic STA ↔ STA+AP role switching required for the mesh.
-//
-//            Role model
-//            ----------
-//            Default  = STA mode  → passive receiver, low power.
-//            Sending  = STA+AP    → active AP interface allows ESP-NOW broadcast
-//                                   to be heard by all channel-1 devices.
-//            After TX = STA mode  → revert to receiver role.
-//
+//            Manages WiFi initialisation, ESP-NOW registration, and peer tracking.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-25
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
 #include <string.h>

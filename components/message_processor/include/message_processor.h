@@ -1,13 +1,10 @@
 //
 // File Path: ESP-NOW-MeshCore/components/message_processor/include/message_processor.h
 // Brief:     Header file for message_processor component.
-//            Handles incoming ESP-NOW packets: decryption, deduplication (flooding
-//            cache), ACK sending, mesh device registration, and rebroadcasting.
-//
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
 #ifndef MESSAGE_PROCESSOR_H

@@ -1,12 +1,16 @@
 //
 // File Path: ESP-NOW-MeshCore/components/device_reset/device_reset.c
 // Brief:     Source file for the generic Device Reset component.
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-05-04
+// UpdateDate: 2026-05-05
 //
 
 #include "device_reset.h"
 #include "shared_config.h"
 #include "mesh_manager.h"
-#include "blink_led.h"
+#include "status_indicator.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -37,17 +41,11 @@ void device_reset_check_trigger(void)
             // 1. Clear Mesh Data
             mesh_manager_factory_reset();
 
-            // 2. Future: Clear WiFi credentials or other NVS namespaces here
-            // nvs_flash_erase(); 
-
-            // Visual Confirmation: Medium Red Blink (300ms)
+            // 2. Visual Confirmation: Flash the Disconnected (Red) state
             for (int i = 0; i < 6; i++) {
-                gpio_set_level(RGB_LED_RED_GPIO, 1);
-                gpio_set_level(RGB_LED_GREEN_GPIO, 0);
-                gpio_set_level(RGB_LED_BLUE_GPIO, 0);
+                status_indicator_set_state(LED_STATE_DISCONNECTED);
                 vTaskDelay(pdMS_TO_TICKS(300));
-
-                gpio_set_level(RGB_LED_RED_GPIO, 0);
+                status_indicator_set_state(LED_STATE_OFF);
                 vTaskDelay(pdMS_TO_TICKS(300));
             }
         } else {

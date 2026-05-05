@@ -3,25 +3,11 @@
 // Brief:     Source file for mesh_manager component.
 //            Manages live peer tracking AND persistent NVS storage of the full
 //            Known Peer List (MAC + Name binary blob) so that the mesh can
-//            detect FULL vs PARTIAL connectivity immediately after a reboot,
-//            without waiting for all devices to send a heartbeat.
-//
-//            NVS Layout (namespace: MESH_NVS_NAMESPACE = "mesh_cfg"):
-//              key "peer_list" : binary blob of nvs_peer_entry_t[MESH_MAX_DEVICES]
-//                                Each entry: { uint8_t mac[6], char name[32] }
-//              key "peer_cnt"  : uint8_t -- number of valid entries in the blob
-//
-//            Boot Sequence:
-//              1. mesh_manager_init() opens NVS and reads "peer_cnt" + "peer_list".
-//              2. All stored peers are inserted into the RAM peer_table with
-//                 is_online=false and last_seen_ms=0.
-//              3. When the first heartbeat from a peer arrives, it is marked online.
-//              4. The LED logic in mesh_task immediately computes FULL vs PARTIAL.
-//
+//            detect FULL vs PARTIAL connectivity immediately after a reboot.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-30
-// UpdateDate: 2026-05-04
+// UpdateDate: 2026-05-05
 //
 
 #include "mesh_manager.h"

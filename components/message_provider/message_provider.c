@@ -1,17 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/message_provider/message_provider.c
 // Brief:     Source file for message_provider component.
-//            Builds the outgoing ESP-NOW DATA packet with the typed wire format:
-//            ┌──────────┬──────────────────────────────────────────┐
-//            │ Byte 0   │ 0x01  (MSG_TYPE_DATA)                    │
-//            ├──────────┼──────────────────────────────────────────┤
-//            │ Bytes 1… │ [16-byte IV] + [AES-128-CBC ciphertext]  │
-//            └──────────┴──────────────────────────────────────────┘
-//
+//            Builds the outgoing ESP-NOW DATA packet with unique sequence numbers.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
 #include "message_provider.h"
@@ -71,8 +65,8 @@ size_t message_provider_get_next(char *buffer, size_t max_len)
 
     // Encrypt into buffer starting at offset 1 (after the type byte)
     size_t encrypted_len = security_manager_encrypt(plaintext,
-                                                    (uint8_t *)&buffer[1],
-                                                    max_len - 1);
+                                                     (uint8_t *)&buffer[1],
+                                                     max_len - 1);
     if (encrypted_len == 0) return 0;
 
     return 1 + encrypted_len; // type byte + ciphertext

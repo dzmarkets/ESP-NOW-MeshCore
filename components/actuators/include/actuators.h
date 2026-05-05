@@ -1,6 +1,10 @@
 //
 // File Path: ESP-NOW-MeshCore/components/actuators/include/actuators.h
 // Brief:     Header file for actuators component.
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #ifndef ACTUATORS_H

@@ -2,8 +2,8 @@
 
 * **File Path:** `README.md`
 * **Author:** M. YOUCEF Yazid (yazid.youcef@gmail.com)
-* **Version:** 0.6.0 (Multi-Node Sync Edition)
-* **Update Date:** 2026-05-04
+* **Version:** 0.7.0 (Multi-Node Sync Edition)
+* **Update Date:** 2026-05-05
 
 ---
 
@@ -90,8 +90,9 @@ The project is strictly modular. Each component is a standalone directory under 
 *   **Payload Formatting:** Builds the unique plaintext string in the format: `[NAME | MAC | SEQ] SENSOR_DATA`.
 *   **Encryption Wrapper:** Interfaces with the `security_manager` to generate a random 16-byte IV for every single packet, ensuring that even identical sensor readings look unique over the air.
 
-### 5. `blink_led` (The Visual Driver)
-*   **Dual Hardware Support:** Supports both standard **3-pin RGB LEDs** (GPIO toggling) and **WS2812B Addressable LEDs** (using the RMT/led_strip driver).
+### 5. `status_indicator` (The Visual Driver)
+*   **Dual Hardware Support:** Supports both standard **3-pin RGB LEDs** (GPIO toggling) and **WS2812B Addressable LEDs**.
+*   **Custom Local Driver:** Uses a high-performance, internal `ws2812_driver` component built directly on the **ESP-IDF RMT peripheral**, eliminating the need for external managed components.
 *   **Asynchronous Blinking:** Uses the `esp_timer` API to toggle the LED at 500ms intervals for the "Partial Mesh" state, ensuring the main application loop is never blocked.
 
 ### 6. `security_manager` (The Security Core)

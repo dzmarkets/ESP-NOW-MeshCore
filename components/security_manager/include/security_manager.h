@@ -1,6 +1,10 @@
 //
 // File Path: ESP-NOW-MeshCore/components/security_manager/include/security_manager.h
 // Brief:     Header file for security_manager component.
+// Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
+// Version:   0.3.0
+// CreateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #ifndef SECURITY_MANAGER_H

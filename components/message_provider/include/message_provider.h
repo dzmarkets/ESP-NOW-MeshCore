@@ -2,9 +2,9 @@
 // File Path: ESP-NOW-MeshCore/components/message_provider/include/message_provider.h
 // Brief:     Header file for message_provider component.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.0.1
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-26
+// UpdateDate: 2026-05-05
 //
 
 #ifndef MESSAGE_PROVIDER_H

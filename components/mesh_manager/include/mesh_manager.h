@@ -1,28 +1,11 @@
 //
 // File Path: ESP-NOW-MeshCore/components/mesh_manager/include/mesh_manager.h
 // Brief:     Header file for mesh_manager component.
-//            Manages live peer tracking AND persistent NVS storage of the full
-//            Known Peer List (MAC addresses + Names) so that the mesh can
-//            detect FULL vs PARTIAL connectivity immediately after a reboot.
-//
-//            NVS Layout (namespace: "mesh_cfg"):
-//              key "peer_list" : binary blob of nvs_peer_entry_t[MESH_MAX_DEVICES]
-//                                Each entry is: { uint8_t mac[6], char name[32] }
-//              key "peer_cnt"  : uint8_t – number of valid entries in the blob
-//
-//            Boot Behaviour:
-//              On init, stored peers are loaded and pre-inserted into the RAM table
-//              with is_online=false. As heartbeats arrive, devices are marked online.
-//              This allows instant FULL/PARTIAL LED status without waiting for discovery.
-//
-//            Factory Reset:
-//              Call mesh_manager_factory_reset() to erase the NVS keys and clear the
-//              RAM table. Required when permanently removing a device from the mesh.
-//
+//            Manages live peer tracking AND persistent NVS storage.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-30
-// UpdateDate: 2026-05-04
+// UpdateDate: 2026-05-05
 //
 
 #ifndef MESH_MANAGER_H

@@ -3,9 +3,9 @@
 // Brief:     Centralized configuration file for easily changeable settings.
 //            All GPIO pins and system-wide constants are defined here.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.1.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-05-02
+// UpdateDate: 2026-05-05
 //
 
 #ifndef SHARED_CONFIG_H

@@ -1,7 +1,7 @@
 //
-// File Path: ESP-NOW-MeshCore/components/blink_led/blink_led.c
-// Brief:     Source file for blink_led component (RGB LED driver).
-//            Drives a common-cathode 3-pin RGB LED using three independent GPIO pins.
+// File Path: ESP-NOW-MeshCore/components/status_indicator/status_indicator.c
+// Brief:     Source file for status_indicator component (RGB LED driver).
+//            Drives a common-cathode 3-pin RGB LED or WS2812B addressable LED.
 //            GPIO pin numbers are centralised in shared_config.h.
 //
 //            Colour mapping:
@@ -10,19 +10,20 @@
 //              BLUE  (LED_STATE_SENDING)      – transmitting / waiting for ACK.
 //
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.2.0
+// Version:   0.3.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-04-30
+// UpdateDate: 2026-05-05
 //
 
-#include "blink_led.h"
+#include "status_indicator.h"
 #include "shared_config.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 
 #if !USE_EXTERNAL_RGB_LED
-#include "led_strip.h"
-static led_strip_handle_t s_led_strip = NULL;
+#include "ws2812_driver.h"
+static ws2812_handle_t s_led_strip = NULL;
 #endif
 
 #ifndef RGB_LED_RED_GPIO
@@ -37,9 +38,7 @@ static led_strip_handle_t s_led_strip = NULL;
 #define RGB_LED_BLUE_GPIO   6
 #endif
 
-#include "esp_timer.h"
-
-static const char *TAG = "blink_led";
+static const char *TAG = "status_ind";
 
 // Track the current logical state
 static led_state_t s_current_state = LED_STATE_DISCONNECTED;
@@ -60,11 +59,11 @@ static void rgb_set(int r, int g, int b)
 #else
     if (s_led_strip) {
         if (r == 0 && g == 0 && b == 0) {
-            led_strip_clear(s_led_strip);
+            ws2812_clear(s_led_strip);
         } else {
             // WS2812 is bright, using 50 instead of 255
-            led_strip_set_pixel(s_led_strip, 0, r ? 50 : 0, g ? 50 : 0, b ? 50 : 0);
-            led_strip_refresh(s_led_strip);
+            ws2812_set_pixel(s_led_strip, 0, r ? 50 : 0, g ? 50 : 0, b ? 50 : 0);
+            ws2812_refresh(s_led_strip);
         }
     }
 #endif
@@ -87,7 +86,7 @@ static void blink_timer_callback(void* arg)
 // Public API
 // ---------------------------------------------------------------------------
 
-void blink_led_configure(void)
+void status_indicator_configure(void)
 {
 #if USE_EXTERNAL_RGB_LED
     ESP_LOGI(TAG, "Configuring EXTERNAL RGB LED  R=%d  G=%d  B=%d",
@@ -107,15 +106,8 @@ void blink_led_configure(void)
 #else
     ESP_LOGI(TAG, "Configuring INTERNAL WS2812B LED on GPIO %d", WS2812B_LED_GPIO);
     
-    led_strip_config_t strip_config = {
-        .strip_gpio_num = WS2812B_LED_GPIO,
-        .max_leds = 1, 
-    };
-    led_strip_rmt_config_t rmt_config = {
-        .resolution_hz = 10 * 1000 * 1000, // 10MHz
-    };
-    if (led_strip_new_rmt_device(&strip_config, &rmt_config, &s_led_strip) == ESP_OK) {
-        led_strip_clear(s_led_strip);
+    if (ws2812_init(WS2812B_LED_GPIO, 1, &s_led_strip) == ESP_OK) {
+        ws2812_clear(s_led_strip);
     } else {
         ESP_LOGE(TAG, "Failed to initialize WS2812B LED");
     }
@@ -124,16 +116,16 @@ void blink_led_configure(void)
     // Setup blinking timer (500ms toggle)
     const esp_timer_create_args_t periodic_timer_args = {
         .callback = &blink_timer_callback,
-        .name = "blink_led_timer"
+        .name = "status_ind_timer"
     };
     esp_timer_create(&periodic_timer_args, &s_blink_timer);
     esp_timer_start_periodic(s_blink_timer, 500000); // 500ms
 
     // Default state: RED (disconnected)
-    blink_led_set_state(LED_STATE_DISCONNECTED);
+    status_indicator_set_state(LED_STATE_DISCONNECTED);
 }
 
-void blink_led_set_state(led_state_t state)
+void status_indicator_set_state(led_state_t state)
 {
     if (s_current_state == state) return;
     s_current_state = state;
@@ -141,23 +133,27 @@ void blink_led_set_state(led_state_t state)
     switch (state) {
         case LED_STATE_DISCONNECTED:
             rgb_set(1, 0, 0);   // RED
-            ESP_LOGI(TAG, "LED -> RED   (No peers online)");
+            ESP_LOGI(TAG, "Indicator -> RED   (No peers online)");
             break;
 
         case LED_STATE_CONNECTED:
             rgb_set(0, 1, 0);   // GREEN SOLID
-            ESP_LOGI(TAG, "LED -> GREEN (All peers online)");
+            ESP_LOGI(TAG, "Indicator -> GREEN (All peers online)");
             break;
 
         case LED_STATE_PARTIAL:
             s_blink_toggle = true;
             rgb_set(0, 1, 0);   // Start GREEN ON
-            ESP_LOGI(TAG, "LED -> GREEN BLINK (Partial mesh)");
+            ESP_LOGI(TAG, "Indicator -> GREEN BLINK (Partial mesh)");
             break;
 
         case LED_STATE_SENDING:
             rgb_set(0, 0, 1);   // BLUE
-            ESP_LOGI(TAG, "LED -> BLUE  (Sending / Waiting ACK)");
+            ESP_LOGI(TAG, "Indicator -> BLUE  (Sending / Waiting ACK)");
+            break;
+
+        case LED_STATE_OFF:
+            rgb_set(0, 0, 0);   // OFF
             break;
 
         default:
@@ -166,7 +162,7 @@ void blink_led_set_state(led_state_t state)
     }
 }
 
-led_state_t blink_led_get_state(void)
+led_state_t status_indicator_get_state(void)
 {
     return s_current_state;
 }
