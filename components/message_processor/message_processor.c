@@ -197,7 +197,10 @@ void message_processor_handle_received(const uint8_t *src_mac,
     ESP_LOGI(TAG, "Payload from %s (" MACSTR "): %s", 
              strlen(peer_name) > 0 ? peer_name : "UNKNOWN",
              MAC2STR(src_mac), plaintext);
+             
+#if DEVICE_ROLE == ROLE_ACTUATOR || DEVICE_ROLE == ROLE_BOTH
     actuators_execute(plaintext);
+#endif
 
     // --- Rebroadcast the original DATA frame (multi-hop flood) ---
     // Every unique packet is rebroadcasted exactly once.

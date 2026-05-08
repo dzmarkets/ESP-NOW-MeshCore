@@ -3,13 +3,42 @@
 // Brief:     Centralized configuration file for easily changeable settings.
 //            All GPIO pins and system-wide constants are defined here.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.3.0
+// Version:   0.4.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-05-05
+// UpdateDate: 2026-05-07
 //
 
 #ifndef SHARED_CONFIG_H
 #define SHARED_CONFIG_H
+
+// =============================================================================
+// --- Node Identification ---
+// =============================================================================
+// Unique label for this node (each device in the mesh MUST have a unique label for diagnostics)
+#define NODE_LABEL "NODE_A"
+
+// =============================================================================
+// --- Topic / Keyword Routing (Pub/Sub) ---
+// =============================================================================
+// Keywords that THIS actuator listens for. If a sensor tags its data with any 
+// of these keywords (or "ALL"), this actuator will process it.
+// Use a comma-separated list for multiple keywords (e.g., "LIGHT,HVAC").
+#define ACTUATOR_KEYWORDS "LIGHT"
+
+// Keywords that THIS sensor attaches to its outgoing data.
+// Use a comma-separated list (e.g., "LIGHT,HVAC") or "ALL" for broadcast.
+#define DATA_KEYWORDS "LIGHT"
+
+// =============================================================================
+// --- Device Role ---
+// =============================================================================
+// Define the role of this specific device to optimize its task allocation:
+#define ROLE_SENSOR   1  // Reads data, does not process incoming actuator commands
+#define ROLE_ACTUATOR 2  // Processes commands, does not read sensor data
+#define ROLE_BOTH     3  // Default, does both
+
+// Set the active role for this device
+#define DEVICE_ROLE ROLE_BOTH
 
 // =============================================================================
 // --- Network Security ---

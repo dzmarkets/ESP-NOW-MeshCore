@@ -7,12 +7,12 @@
 //            Colour mapping:
 //              RED   (LED_STATE_DISCONNECTED) – no peers, mesh offline.
 //              GREEN (LED_STATE_CONNECTED)    – at least one peer reachable.
-//              BLUE  (LED_STATE_SENDING)      – transmitting / waiting for ACK.
+//              BLUE  (LED_STATE_SENDING)      – transmitting sensor data / waiting for ACK.
 //
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.3.0
+// Version:   0.4.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-05-05
+// UpdateDate: 2026-05-08
 //
 
 #include "status_indicator.h"
@@ -149,7 +149,7 @@ void status_indicator_set_state(led_state_t state)
 
         case LED_STATE_SENDING:
             rgb_set(0, 0, 1);   // BLUE
-            ESP_LOGI(TAG, "Indicator -> BLUE  (Sending / Waiting ACK)");
+            ESP_LOGI(TAG, "Indicator -> BLUE  (Sending Sensor Data / Waiting ACK)");
             break;
 
         case LED_STATE_OFF:

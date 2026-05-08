@@ -47,16 +47,10 @@
 #include "message_processor.h"// Logic for handling incoming packets (parsing/actuators)
 #include "mesh_manager.h"     // Tracks peer status and device counts
 #include "sensors.h"          // Hardware-specific sensor reading logic
-#include "device_reset.h"      // Modular Device Reset logic
+#include "device_reset.h"     // Modular Device Reset logic
+#include "actuators.h"        // Actuator initialization and execution
 
 static const char *TAG = "main";
-
-// --- Device Identity ---
-// Change this to a unique label for each physical board in your mesh.
-// This name is embedded in every message sent by this node.
-#ifndef NODE_NAME
-#define NODE_NAME    "NODE_A"
-#endif
 
 // The ESP-NOW broadcast address (all FF's). 
 // Sending to this MAC ensures all devices on the same channel hear the packet.
@@ -94,12 +88,14 @@ static void on_espnow_send(const uint8_t *dest_mac, esp_now_send_status_t status
 // Helper: broadcast_data
 // Sends a packet and waits for any mesh node to acknowledge it.
 // ---------------------------------------------------------------------------
-static bool broadcast_data(const uint8_t *payload, size_t len)
+static bool broadcast_data(const uint8_t *payload, size_t len, bool is_sensor_data)
 {
     bool success = false;
     
-    // Visually indicate transmission on the status LED
-    status_indicator_set_state(LED_STATE_SENDING);
+    // Visually indicate transmission on the status LED ONLY for sensor data
+    if (is_sensor_data) {
+        status_indicator_set_state(LED_STATE_SENDING);
+    }
 
     // Briefly switch to AP+STA or broadcast-ready mode if needed by the driver
     espnow_control_set_ap_mode();
@@ -139,6 +135,7 @@ static bool broadcast_data(const uint8_t *payload, size_t len)
 // TASK: sensor_task
 // Runs at Priority 10 (Highest). Responsible for reading hardware inputs.
 // ---------------------------------------------------------------------------
+#if DEVICE_ROLE == ROLE_SENSOR || DEVICE_ROLE == ROLE_BOTH
 static void sensor_task(void *pvParameters)
 {
     ESP_LOGI(TAG, "Sensor task started (High Priority - 50ms poll)");
@@ -159,6 +156,7 @@ static void sensor_task(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(50)); 
     }
 }
+#endif
 
 // ---------------------------------------------------------------------------
 // TASK: mesh_task
@@ -172,6 +170,7 @@ static void mesh_task(void *pvParameters)
     while (1) {
         int64_t now_ms = esp_timer_get_time() / 1000;
         bool should_send = false;
+        bool is_sensor_data = false;
 
         // 1. Peer Health Check: Remove nodes that haven't responded in a while
         mesh_manager_check_timeouts();
@@ -181,24 +180,32 @@ static void mesh_task(void *pvParameters)
         int total_expected = mesh_manager_get_device_count() - 1; 
         int online_peers = mesh_manager_get_online_peer_count();
 
-        if (online_peers == 0) {
-            status_indicator_set_state(LED_STATE_DISCONNECTED); // Red: Alone
-        } else if (online_peers >= total_expected && total_expected > 0) {
-            status_indicator_set_state(LED_STATE_CONNECTED);    // Green: Full mesh
+        // New Strategy based on NVS Comparison:
+        if (total_expected == 0) {
+            // The device has never seen a peer in its lifetime (Factory Reset state)
+            status_indicator_set_state(LED_STATE_DISCONNECTED); // Red: Alone / Unconfigured
+        } else if (online_peers != total_expected) {
+            // The number of real connected devices is DIFFERENT from the NVS memory.
+            // This covers both 1/2 peers online AND 0/2 peers online.
+            // If it expects peers but is missing them, it blinks green to show it's looking for them!
+            status_indicator_set_state(LED_STATE_PARTIAL);      // Blinking Green: Partial/Missing Mesh
         } else {
-            status_indicator_set_state(LED_STATE_PARTIAL);      // Blue/Yellow: Partial mesh
+            // All expected peers from NVS are actively online
+            status_indicator_set_state(LED_STATE_CONNECTED);    // Solid Green: Full mesh
         }
 
         // 3. Transmission Logic (Decide if we need to send a packet)
         if (g_transmission_pending) {
             // Priority 1: Instant send because sensor data changed
             should_send = true;
+            is_sensor_data = true;
             g_transmission_pending = false;
         }
         else if ((now_ms - last_send_time) > MESH_KEEPALIVE_INTERVAL_MS) {
             // Priority 2: Periodic heartbeat to let others know we are still alive
             ESP_LOGI(TAG, "Periodic keepalive triggered");
             should_send = true;
+            is_sensor_data = false;
         }
 
         // 4. Packet Execution
@@ -211,7 +218,7 @@ static void mesh_task(void *pvParameters)
             size_t len = message_provider_get_next((char *)payload, sizeof(payload));
 
             if (len > 0) {
-                broadcast_data(payload, len); 
+                broadcast_data(payload, len, is_sensor_data); 
                 last_send_time = esp_timer_get_time() / 1000;
             }
         }
@@ -228,7 +235,14 @@ void app_main(void)
 {
     // --- Step 1: Hardware & Component Initialization ---
     status_indicator_configure();     // Setup the RGB Status LED
+    
+#if DEVICE_ROLE == ROLE_SENSOR || DEVICE_ROLE == ROLE_BOTH
     sensors_init();            // Setup GPIOs for inputs (buttons/sensors)
+#endif
+
+#if DEVICE_ROLE == ROLE_ACTUATOR || DEVICE_ROLE == ROLE_BOTH
+    actuators_init();          // Setup GPIOs and RTOS Queue for outputs (LEDs/relays)
+#endif
 
     // --- Step 2: Modular Device Reset Check ---
     // This encapsulated call handles the GPIO setup, 3s hold detection, 
@@ -237,7 +251,7 @@ void app_main(void)
 
     mesh_manager_init();       // Initialize the peer tracking table
     message_processor_init();  // Setup decryption and command handling
-    message_provider_init(NODE_NAME); // Initialize signing and identity
+    message_provider_init(NODE_LABEL); // Initialize signing and identity
 
     // --- Step 2: Network Stack Initialization ---
     // Initialize WiFi and ESP-NOW with our local callback functions
@@ -250,11 +264,13 @@ void app_main(void)
     espnow_control_add_peer(broadcast_mac);
 
     // --- Step 3: Launch RTOS Tasks ---
+#if DEVICE_ROLE == ROLE_SENSOR || DEVICE_ROLE == ROLE_BOTH
     // The sensor task polls inputs at high speed (Priority 10)
     xTaskCreate(sensor_task, "sensor_task", 4096, NULL, 10, NULL);
+#endif
     
     // The mesh task handles networking in the background (Priority 5)
     xTaskCreate(mesh_task, "mesh_task", 4096, NULL, 5, NULL);
 
-    ESP_LOGI(TAG, "Mesh Node [%s] started successfully.", NODE_NAME);
+    ESP_LOGI(TAG, "Mesh Node [%s] started successfully. Role: %d", NODE_LABEL, DEVICE_ROLE);
 }

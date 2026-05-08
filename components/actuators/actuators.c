@@ -3,9 +3,9 @@
 // Brief:     Source file for actuators component.
 //            Decouples physical output commands from the network task.
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.3.0
+// Version:   0.4.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-05-05
+// UpdateDate: 2026-05-07
 //
 
 #include "actuators.h"
@@ -17,6 +17,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+
+#if DEVICE_ROLE == ROLE_ACTUATOR || DEVICE_ROLE == ROLE_BOTH
 
 static const char *TAG = "actuators";
 
@@ -115,6 +117,58 @@ void actuators_execute(const char *payload)
 
 static void process_command(const char *payload)
 {
+    // Filter messages based on Keywords (Pub/Sub routing)
+    bool keyword_match = false;
+    
+    // The payload format from message_provider is: "[NODE_A | MAC | SEQ] [LIGHT]CMD:LED_ON"
+    // We must skip the first mesh network header [...] to find the application keywords.
+    const char *app_payload = strchr(payload, ']');
+    if (app_payload) {
+        app_payload++; // Skip the closing bracket of the network header
+        
+        // Now look for the application keyword block e.g., "[LIGHT]"
+        const char *keyword_start = strchr(app_payload, '[');
+        if (keyword_start) {
+            const char *keyword_end = strchr(keyword_start, ']');
+            if (keyword_end) {
+                size_t list_len = keyword_end - keyword_start - 1;
+                char target_list[128];
+                if (list_len < sizeof(target_list)) {
+                    strncpy(target_list, keyword_start + 1, list_len);
+                    target_list[list_len] = '\0';
+                    
+                    // Parse the comma-separated keywords in the payload
+                    char *payload_token = strtok(target_list, ",");
+                    while (payload_token != NULL) {
+                        if (strcmp(payload_token, "ALL") == 0) {
+                            keyword_match = true;
+                            break;
+                        }
+                        
+                        // Check if payload_token exists in our ACTUATOR_KEYWORDS
+                        char my_keywords[128];
+                        strncpy(my_keywords, ACTUATOR_KEYWORDS, sizeof(my_keywords));
+                        char *my_token = strtok(my_keywords, ",");
+                        while (my_token != NULL) {
+                            if (strcmp(payload_token, my_token) == 0) {
+                                keyword_match = true;
+                                break;
+                            }
+                            my_token = strtok(NULL, ",");
+                        }
+                        
+                        if (keyword_match) break;
+                        payload_token = strtok(NULL, ",");
+                    }
+                }
+            }
+        }
+    }
+    
+    if (!keyword_match) {
+        ESP_LOGD(TAG, "Ignoring payload due to keyword mismatch: %s", payload);
+        return;
+    }
 
 #if ACTIVE_APP_SAMPLE == 1
     // --- MOCK ACTUATOR LOGIC ---
@@ -159,3 +213,5 @@ static void process_command(const char *payload)
     gpio_set_level(MAX485_RE_DE_GPIO, 0);
 #endif
 }
+
+#endif // DEVICE_ROLE == ROLE_ACTUATOR || DEVICE_ROLE == ROLE_BOTH

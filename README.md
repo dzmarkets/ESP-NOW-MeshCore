@@ -2,8 +2,8 @@
 
 * **File Path:** `README.md`
 * **Author:** M. YOUCEF Yazid (yazid.youcef@gmail.com)
-* **Version:** 0.7.0 (Multi-Node Sync Edition)
-* **Update Date:** 2026-05-05
+* **Version:** 0.8.0 (Pub/Sub & Role Optimization Edition)
+* **Update Date:** 2026-05-08
 
 ---
 
@@ -28,6 +28,15 @@ By combining hardware-accelerated AES-128 encryption with a custom application-l
 *   **Dedicated Actuator Task (Priority 7):** Uses a high-speed **FreeRTOS Queue** to decouple physical output commands (like slow Modbus UART writes) from the ESP-NOW driver context. This prevents hardware delays from blocking the radio and causing packet loss.
 *   **Background Mesh Task (Priority 5):** Manages the health registry, heartbeats, and ACKs without interfering with the physical hardware layer.
 
+### 📡 Topic-Based Pub/Sub Routing (New in 0.8.0)
+*   **Keyword Routing:** Replaces hardcoded node targeting with an abstract **Publish/Subscribe (Pub/Sub)** architecture. 
+*   **Decoupled Payloads:** Sensors attach `DATA_KEYWORDS` (e.g., "LIGHT,HVAC") to their data. Actuators listen for specific `ACTUATOR_KEYWORDS`. The mesh automatically routes and executes commands if the topics match.
+*   **One-to-Many / Many-to-One:** A single sensor can trigger multiple actuators simultaneously, and an actuator can subscribe to multiple topics (like "LIVING_ROOM,EMERGENCY_ALL_OFF").
+
+### 🧠 Role-Based Compilation Optimization (New in 0.8.0)
+*   **Memory Isolation:** Configure a device as `ROLE_SENSOR`, `ROLE_ACTUATOR`, or `ROLE_BOTH` in `shared_config.h`.
+*   **Zero-Overhead Binaries:** Preprocessor directives physically remove unused logic from the compiled `.bin` firmware. An actuator-only device won't even launch the `sensor_task`, saving significant CPU and Flash memory.
+
 ### 🛡️ Secure-Mesh Architecture
 *   **Military-Grade Encryption:** Every packet is encrypted using **AES-128-CBC** via the `mbedtls` library. 
 *   **Randomized IVs:** Each transmission generates a unique **16-byte Initialization Vector (IV)**. This ensures that even identical sensor readings produce completely different ciphertext, making the network immune to packet identification and **Replay Attacks**.
@@ -42,10 +51,10 @@ By combining hardware-accelerated AES-128 encryption with a custom application-l
 
 ### 🚥 Intelligent Visual Diagnostics (RGB LED)
 The system uses a high-priority background task to provide instant visual feedback on the state of the entire network:
-*   🔴 **RED (Isolated):** The node is powered on but has **zero active peers** in range.
-*   🟢 **GREEN SOLID (Perfect):** The node is connected, and **100% of all registered peers** are currently online.
-*   🟢 **GREEN BLINKING (Warning):** The node is connected, but **some peers have gone offline**. This provides an immediate alert if a device in another room has lost power.
-*   🔵 **BLUE (Activity):** Indicates a transmission is in progress and the node is waiting for a delivery receipt (ACK).
+*   🔴 **RED (Unconfigured/Wiped):** The device has 0 peers stored in its NVS memory and hears no one (Factory Reset state).
+*   🟢 **GREEN SOLID (Perfect):** The number of physically connected peers perfectly matches the count stored in NVS memory.
+*   🟢 **GREEN BLINKING (Warning):** The node expects peers from its NVS memory, but some (or all) are offline. This provides an immediate alert if a device has lost power or the radio link is broken.
+*   🔵 **BLUE (Activity):** Indicates a transmission is in progress and the node is waiting for a delivery receipt (ACK). **Note:** This only flashes for *actual sensor data changes*. Silent background heartbeats are filtered out to prevent annoying flickers.
 
 ### 🧹 Factory Reset (How to use the Reset)
 Because nodes remember their peers permanently in NVS, you must perform a **Factory Reset** if you permanently remove a device from your network. Otherwise, the remaining nodes will permanently show a "Partial Mesh" (Blinking Green) state because they are still waiting for the missing device.
@@ -110,7 +119,7 @@ The project is strictly modular. Each component is a standalone directory under 
 *   **Visual Feedback:** Manages the medium-speed Red blink pattern (300ms) to confirm successful data erasure.
 
 ### 9. `shared_config` (Global Configuration)
-*   **Single Source of Truth:** Centralizes all GPIO assignments, Wi-Fi channels, timeout constants, and application mode toggles. Modifying this one file reconfigures the entire project.
+*   **Single Source of Truth:** Centralizes all GPIO assignments, Wi-Fi channels, Pub/Sub Keywords, Device Roles, and timeout constants. Modifying this one file reconfigures the entire project.
 
 ---
 
@@ -204,9 +213,9 @@ The network uses AES-128 encryption. To secure your private mesh:
 3.  **Important:** All nodes in your mesh MUST share the exact same key, or they will be unable to decrypt each other's data.
 
 ### 5. Deployment Identity
-In `main/main.c`, assign a unique label to each physical board to enable individual tracking in the serial logs:
+In `components/shared_config/include/shared_config.h`, assign a unique label to each physical board to enable individual tracking in the serial logs:
 ```c
-#define NODE_NAME "NODE_A" // NODE_B, NODE_C, etc.
+#define NODE_LABEL "NODE_A" // NODE_B, NODE_C, etc.
 ```
 
 ---
@@ -235,10 +244,10 @@ The RGB LED provides instant feedback on the health of your network:
 
 | LED Color | Pattern | Meaning | Action Needed |
 | :--- | :--- | :--- | :--- |
-| 🔴 **Red** | Solid | **Disconnected.** This node sees 0 active peers. | Check if other nodes are powered on and in range. |
-| 🟢 **Green** | Solid | **Full Health.** All peers ever registered are currently online. | None. The mesh is 100% operational. |
-| 🟢 **Green** | Blinking | **Partial Mesh.** At least one peer is online, but some are missing. | Check if one of your nodes has lost power or crashed. |
-| 🔵 **Blue** | Brief | **Transmitting.** The node is sending data and waiting for an ACK. | None. Normal operation during data changes. |
+| 🔴 **Red** | Solid | **Unconfigured / Wiped.** The device has 0 peers stored in its NVS memory. | Perform a Factory Reset if stuck, or wait for another node. |
+| 🟢 **Green** | Solid | **Full Health.** The number of real connected peers exactly matches the NVS memory. | None. The mesh is 100% operational. |
+| 🟢 **Green** | Blinking | **Missing Peers.** The device expects peers from its NVS memory, but some (or all) are offline. | Check if one of your nodes has lost power or crashed. |
+| 🔵 **Blue** | Brief | **Transmitting.** The node is sending *sensor data* and waiting for an ACK. | None. Filtered to ignore background heartbeats. |
 
 ### Step 4: Testing Mesh Robustness
 To verify the health monitoring system:

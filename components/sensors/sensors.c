@@ -3,9 +3,9 @@
 // Brief:     Source file for sensors component.
 //            Handles reading hardware inputs (buttons/simulated sensors).
 // Author:    M. YOUCEF Yazid (yazid.youcef@gmail.com)
-// Version:   0.3.0
+// Version:   0.4.0
 // CreateDate: 2026-04-26
-// UpdateDate: 2026-05-05
+// UpdateDate: 2026-05-07
 //
 
 #include "sensors.h"
@@ -15,6 +15,8 @@
 #include "driver/gpio.h"
 #include <stdio.h>
 #include <string.h>
+
+#if DEVICE_ROLE == ROLE_SENSOR || DEVICE_ROLE == ROLE_BOTH
 
 static const char *TAG = "sensors";
 
@@ -53,16 +55,16 @@ void sensors_read(char *buffer, size_t max_len)
     float mock_temp = (current_time_sec / 15) % 2 == 0 ? 24.5f : 25.0f;
     int mock_humidity = 60; // Static humidity
     
-    snprintf(buffer, max_len, "TEMP:%.1fC|HUM:%d%%", mock_temp, mock_humidity);
+    snprintf(buffer, max_len, "[%s]TEMP:%.1fC|HUM:%d%%", DATA_KEYWORDS, mock_temp, mock_humidity);
 
 #elif ACTIVE_APP_SAMPLE == 2
     // --- REMOTE POWERING LED (MOMENTARY BUTTON) ---
     int btn_state = gpio_get_level(BUTTON_SENSOR_GPIO);
     // Assuming active low button (pressed = 0)
     if (btn_state == 0) {
-        snprintf(buffer, max_len, "CMD:LED_ON");
+        snprintf(buffer, max_len, "[%s]CMD:LED_ON", DATA_KEYWORDS);
     } else {
-        snprintf(buffer, max_len, "CMD:LED_OFF");
+        snprintf(buffer, max_len, "[%s]CMD:LED_OFF", DATA_KEYWORDS);
     }
 
 #elif ACTIVE_APP_SAMPLE == 3
@@ -79,9 +81,9 @@ void sensors_read(char *buffer, size_t max_len)
     last_btn_state = current_btn_state;
 
     if (led_state) {
-        snprintf(buffer, max_len, "CMD:LED_ON");
+        snprintf(buffer, max_len, "[%s]CMD:LED_ON", DATA_KEYWORDS);
     } else {
-        snprintf(buffer, max_len, "CMD:LED_OFF");
+        snprintf(buffer, max_len, "[%s]CMD:LED_OFF", DATA_KEYWORDS);
     }
 
 #elif ACTIVE_APP_SAMPLE == 4
@@ -103,7 +105,7 @@ void sensors_read(char *buffer, size_t max_len)
     }
 
     // Always output the current state of all 4 LEDs
-    snprintf(buffer, max_len, "CMD:LEDS:%d,%d,%d,%d", 
+    snprintf(buffer, max_len, "[%s]CMD:LEDS:%d,%d,%d,%d", DATA_KEYWORDS,
              gpio_get_level(LED1_GPIO), 
              gpio_get_level(LED2_GPIO), 
              gpio_get_level(LED3_GPIO), 
@@ -113,6 +115,8 @@ void sensors_read(char *buffer, size_t max_len)
     // --- MOD-BUS SENSOR DATA ---
     // Here we would read data from a MOD-BUS slave device and format it.
     // For now, we just send a mock payload indicating MOD-BUS data.
-    snprintf(buffer, max_len, "MODBUS_DATA:READY");
+    snprintf(buffer, max_len, "[%s]MODBUS_DATA:READY", DATA_KEYWORDS);
 #endif
 }
+
+#endif // DEVICE_ROLE == ROLE_SENSOR || DEVICE_ROLE == ROLE_BOTH
