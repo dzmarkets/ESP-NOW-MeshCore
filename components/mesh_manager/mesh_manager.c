@@ -297,6 +297,16 @@ int mesh_manager_get_online_peer_count(void)
     return online;
 }
 
+int mesh_manager_get_ever_seen_count(void)
+{
+    int seen = 0;
+    for (int i = 0; i < s_peer_count; i++) {
+        // A peer has been "seen" if it has a non-zero last_seen timestamp
+        if (s_peer_table[i].last_seen_ms != 0) seen++;
+    }
+    return seen;
+}
+
 bool mesh_manager_is_any_peer_online(void)
 {
     return mesh_manager_get_online_peer_count() > 0;

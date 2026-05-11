@@ -193,21 +193,23 @@ static void mesh_task(void *pvParameters)
 
         // 2. Network Status Visualization:
         //    Update the status LED based on how many mesh peers are currently online.
-        int total_expected = mesh_manager_get_device_count() - 1; 
-        int online_peers = mesh_manager_get_online_peer_count();
+        int total_known   = mesh_manager_get_device_count() - 1;
+        int online_peers  = mesh_manager_get_online_peer_count();
+        int ever_seen     = mesh_manager_get_ever_seen_count();
 
-        // New Strategy based on NVS Comparison:
-        if (total_expected == 0) {
-            // The device has never seen a peer in its lifetime (Factory Reset state)
-            status_indicator_set_state(LED_STATE_DISCONNECTED); // Red: Alone / Unconfigured
-        } else if (online_peers != total_expected) {
-            // The number of real connected devices is DIFFERENT from the NVS memory.
-            // This covers both 1/2 peers online AND 0/2 peers online.
-            // If it expects peers but is missing them, it blinks green to show it's looking for them!
-            status_indicator_set_state(LED_STATE_PARTIAL);      // Blinking Green: Partial/Missing Mesh
+        if (total_known == 0) {
+            // No peers in NVS: Factory Reset state or first boot
+            status_indicator_set_state(LED_STATE_DISCONNECTED); // RED
+        } else if (ever_seen == 0) {
+            // Peers are in NVS but none have ever sent a heartbeat yet (just booted)
+            // Show RED, not PARTIAL, to avoid false "partial mesh" alarm on cold start
+            status_indicator_set_state(LED_STATE_DISCONNECTED); // RED
+        } else if (online_peers == total_known) {
+            // All expected peers are actively online
+            status_indicator_set_state(LED_STATE_CONNECTED);    // SOLID GREEN
         } else {
-            // All expected peers from NVS are actively online
-            status_indicator_set_state(LED_STATE_CONNECTED);    // Solid Green: Full mesh
+            // At least one peer was seen before but is now offline (genuine partial mesh)
+            status_indicator_set_state(LED_STATE_PARTIAL);      // BLINKING GREEN
         }
 
         // 3. Transmission Logic (Decide if we need to send a packet)

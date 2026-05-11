@@ -68,6 +68,14 @@ void mesh_manager_check_timeouts(void);
 int mesh_manager_get_online_peer_count(void);
 
 /**
+ * @brief Returns the number of peers that have been heard at least once
+ *        since this boot (i.e., last_seen_ms != 0).
+ *        Used to distinguish a cold-boot "waiting for first heartbeat" state
+ *        from a genuine "peer went offline" partial mesh event.
+ */
+int mesh_manager_get_ever_seen_count(void);
+
+/**
  * @brief Returns true if at least one remote peer has been seen recently.
  */
 bool mesh_manager_is_any_peer_online(void);

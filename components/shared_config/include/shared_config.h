@@ -15,7 +15,7 @@
 // --- Node Identification ---
 // =============================================================================
 // Unique label for this node (each device in the mesh MUST have a unique label for diagnostics)
-#define NODE_LABEL "NODE_C" // NODE_A, NODE_B, NODE_C, NODE_D, NODE_E
+#define NODE_LABEL "NODE_C" // NODE_A, NODE_B, NODE_C
 
 // =============================================================================
 // --- Topic / Keyword Routing (Pub/Sub) ---
@@ -23,11 +23,11 @@
 // Keywords that THIS actuator listens for. If a sensor tags its data with any 
 // of these keywords (or "ALL"), this actuator will process it.
 // Use a comma-separated list for multiple keywords (e.g., "LIGHT,HVAC").
-#define ACTUATOR_KEYWORDS "LIGHT_B" 
+#define ACTUATOR_KEYWORDS "LIGHT_B" // "LIGHT_A", "LIGHT_C", "LIGHT_B"
 
 // Keywords that THIS sensor attaches to its outgoing data.
 // Use a comma-separated list (e.g., "LIGHT,HVAC") or "ALL" for broadcast.
-#define DATA_KEYWORDS "LIGHT_C"
+#define DATA_KEYWORDS "LIGHT_C" // "LIGHT_A", "LIGHT_B", "LIGHT_C"
 
 // =============================================================================
 // --- Device Role ---

@@ -2,7 +2,7 @@
 
 * **File Path:** `README.md`
 * **Author:** M. YOUCEF Yazid (yazid.youcef@gmail.com)
-* **Version:** 0.8.1 (Safety & Emergency Reset Edition)
+* **Version:** 0.8.2 (Quad-Task Architecture Edition)
 * **Update Date:** 2026-05-11
 
 ---
@@ -14,7 +14,7 @@ Designed for engineers and IoT students, the codebase is strictly developed usin
 1.  **Security:** How to prevent eavesdropping and replay attacks.
 2.  **Reliability:** How to guarantee message delivery without a router.
 3.  **Observability:** How to know the exact health and status of every node in real-time.
-4.  **Performance (New in 0.6.0):** Utilizing a **Tri-Task RTOS Architecture** to ensure real-time sensor polling (50ms) and hardware execution are never blocked by network operations.
+4.  **Performance (New in 0.8.2):** Utilizing a **Quad-Task RTOS Architecture** to ensure real-time sensor polling (50ms) and hardware execution are never blocked by network or maintenance operations.
 
 By combining hardware-accelerated AES-128 encryption with a custom application-layer ACK system and a background health monitor, this project turns the ESP32-S3 into a powerful, secure mesh communicator.
 
@@ -22,11 +22,12 @@ By combining hardware-accelerated AES-128 encryption with a custom application-l
 
 ## 🚀 Key Features
 
-### ⚡ Tri-Task Real-Time Engine (v0.6.0)
-*   **Decoupled Architecture:** The system uses three fully independent FreeRTOS tasks to guarantee zero blocking across the stack.
+### ⚡ Quad-Task Real-Time Engine (v0.8.2)
+*   **Decoupled Architecture:** The system uses **four fully independent FreeRTOS tasks** to guarantee zero blocking across the stack.
 *   **High-Priority Sensor Task (Priority 10):** Polls hardware sensors every **50ms**. Since it never performs networking, sensor readings are truly "Real-Time" and never lag.
 *   **Dedicated Actuator Task (Priority 7):** Uses a high-speed **FreeRTOS Queue** to decouple physical output commands (like slow Modbus UART writes) from the ESP-NOW driver context. This prevents hardware delays from blocking the radio and causing packet loss.
 *   **Background Mesh Task (Priority 5):** Manages the health registry, heartbeats, and ACKs without interfering with the physical hardware layer.
+*   **Persistent Reset Monitor (Priority 5):** A dedicated thread that continuously watches the hardware reset button (GPIO 1) at runtime. This allows for emergency network-wide resets and reboots at any time without requiring a manual power cycle.
 
 ### 📡 Topic-Based Pub/Sub Routing (New in 0.8.0)
 *   **Keyword Routing:** Replaces hardcoded node targeting with an abstract **Publish/Subscribe (Pub/Sub)** architecture. 

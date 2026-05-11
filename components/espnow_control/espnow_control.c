@@ -126,7 +126,7 @@ esp_err_t espnow_control_add_peer(const uint8_t *peer_mac)
     }
 
     if (esp_now_is_peer_exist(peer_mac)) {
-        ESP_LOGI(TAG, "Peer " MACSTR " already registered", MAC2STR(peer_mac));
+        ESP_LOGD(TAG, "Peer " MACSTR " already registered", MAC2STR(peer_mac));
         return ESP_OK;
     }
 
