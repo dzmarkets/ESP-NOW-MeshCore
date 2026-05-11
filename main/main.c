@@ -132,6 +132,22 @@ static bool broadcast_data(const uint8_t *payload, size_t len, bool is_sensor_da
 }
 
 // ---------------------------------------------------------------------------
+// Helper: main_broadcast_emergency_reset
+// Sends a network-wide command to force all peers to reset their actuators
+// and internal states back to default. Used during a factory reset.
+// ---------------------------------------------------------------------------
+void main_broadcast_emergency_reset(void)
+{
+    ESP_LOGW(TAG, "Broadcasting [ALL]CMD:NETWORK_RESET to the mesh...");
+    message_provider_set_message("[ALL]CMD:NETWORK_RESET");
+    uint8_t payload[256];
+    size_t len = message_provider_get_next((char *)payload, sizeof(payload));
+    if (len > 0) {
+        broadcast_data(payload, len, true);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // TASK: sensor_task
 // Runs at Priority 10 (Highest). Responsible for reading hardware inputs.
 // ---------------------------------------------------------------------------

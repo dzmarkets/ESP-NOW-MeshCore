@@ -57,6 +57,27 @@ void sensors_init(void)
 #endif
 }
 
+#if ACTIVE_APP_SAMPLE == 3
+static bool s_toggle_led_state = false;
+static int s_last_btn_state = 1;
+#elif ACTIVE_APP_SAMPLE == 4
+static int s_last_btn_states[4] = {1, 1, 1, 1};
+#endif
+
+void sensors_force_initial_state(void)
+{
+#if ACTIVE_APP_SAMPLE == 3
+    s_toggle_led_state = false;
+#elif ACTIVE_APP_SAMPLE == 4
+    for(int i=0; i<4; i++) {
+        s_last_btn_states[i] = 1;
+        // Optionally update local LEDs if we want them synced
+        // gpio_set_level(led_pins[i], 0);
+    }
+#endif
+    ESP_LOGW(TAG, "Sensor internal states forcefully reset to initial.");
+}
+
 void sensors_read(char *buffer, size_t max_len)
 {
     if (!buffer || max_len == 0) return;
@@ -81,18 +102,15 @@ void sensors_read(char *buffer, size_t max_len)
 
 #elif ACTIVE_APP_SAMPLE == 3
     // --- REMOTE POWERING LED (TOGGLE BUTTON) ---
-    static bool led_state = false;
-    static int last_btn_state = 1;
-    
     int current_btn_state = gpio_get_level(BUTTON_SENSOR_GPIO);
 
     // Detect falling edge (Press)
-    if (current_btn_state == 0 && last_btn_state == 1) {
-        led_state = !led_state; // Toggle the state
+    if (current_btn_state == 0 && s_last_btn_state == 1) {
+        s_toggle_led_state = !s_toggle_led_state; // Toggle the state
     }
-    last_btn_state = current_btn_state;
+    s_last_btn_state = current_btn_state;
 
-    if (led_state) {
+    if (s_toggle_led_state) {
         snprintf(buffer, max_len, "[%s]CMD:LED_ON", DATA_KEYWORDS);
     } else {
         snprintf(buffer, max_len, "[%s]CMD:LED_OFF", DATA_KEYWORDS);
@@ -100,20 +118,19 @@ void sensors_read(char *buffer, size_t max_len)
 
 #elif ACTIVE_APP_SAMPLE == 4
     // --- 4-NODE REMOTE CONTROL (4 TOGGLE BUTTONS) ---
-    static int last_btn_states[4] = {1, 1, 1, 1};
     const int btn_pins[4] = {BTN1_GPIO, BTN2_GPIO, BTN3_GPIO, BTN4_GPIO};
     const int led_pins[4] = {LED1_GPIO, LED2_GPIO, LED3_GPIO, LED4_GPIO};
 
     for(int i = 0; i < 4; i++) {
         int current_btn_state = gpio_get_level(btn_pins[i]);
         // Detect falling edge (Press)
-        if (current_btn_state == 0 && last_btn_states[i] == 1) {
+        if (current_btn_state == 0 && s_last_btn_states[i] == 1) {
             // Toggle the local LED immediately to update state
             int new_state = !gpio_get_level(led_pins[i]);
             gpio_set_level(led_pins[i], new_state);
             ESP_LOGI(TAG, "Button %d pressed! Toggled LED %d to %d", i+1, i+1, new_state);
         }
-        last_btn_states[i] = current_btn_state;
+        s_last_btn_states[i] = current_btn_state;
     }
 
     // Always output the current state of all 4 LEDs

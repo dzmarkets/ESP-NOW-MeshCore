@@ -170,6 +170,27 @@ static void process_command(const char *payload)
         return;
     }
 
+    // --- EMERGENCY NETWORK RESET ---
+    if (strstr(payload, "CMD:NETWORK_RESET") != NULL) {
+        ESP_LOGW(TAG, "⚡ NETWORK EMERGENCY RESET RECEIVED! Forcing all states to initial.");
+        
+        // 1. Reset Physical Actuators
+#if ACTIVE_APP_SAMPLE == 2 || ACTIVE_APP_SAMPLE == 3
+        gpio_set_level(REMOTE_LED_GPIO, 0);
+#elif ACTIVE_APP_SAMPLE == 4
+        gpio_set_level(LED1_GPIO, 0);
+        gpio_set_level(LED2_GPIO, 0);
+        gpio_set_level(LED3_GPIO, 0);
+        gpio_set_level(LED4_GPIO, 0);
+#endif
+
+        // 2. Reset internal sensor software states to prevent re-broadcasting old data
+        extern void sensors_force_initial_state(void);
+        sensors_force_initial_state();
+        
+        return; // Halt further processing of this payload
+    }
+
 #if ACTIVE_APP_SAMPLE == 1
     // --- MOCK ACTUATOR LOGIC ---
     if (strstr(payload, "TEMP:25.0C") != NULL) {

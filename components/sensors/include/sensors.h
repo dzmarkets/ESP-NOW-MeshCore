@@ -29,6 +29,13 @@ void sensors_init(void);
  */
 void sensors_read(char *buffer, size_t max_len);
 
+/**
+ * @brief Forcefully resets all internal software states to their initial conditions.
+ *        Used during a network-wide emergency reset to prevent nodes from rebroadcasting
+ *        stale states after a peer is factory reset.
+ */
+void sensors_force_initial_state(void);
+
 #ifdef __cplusplus
 }
 #endif

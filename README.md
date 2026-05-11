@@ -2,8 +2,8 @@
 
 * **File Path:** `README.md`
 * **Author:** M. YOUCEF Yazid (yazid.youcef@gmail.com)
-* **Version:** 0.8.0 (Pub/Sub & Role Optimization Edition)
-* **Update Date:** 2026-05-08
+* **Version:** 0.8.1 (Safety & Emergency Reset Edition)
+* **Update Date:** 2026-05-11
 
 ---
 
@@ -61,12 +61,23 @@ Because nodes remember their peers permanently in NVS, you must perform a **Fact
 
 **To perform a reset:**
 1.  During normal operation, press and **hold your Factory Reset Button (GPIO 1)** on your ESP32-S3.
-2.  Continue holding the **button for exactly 3 seconds**.
-3.  The RGB LED will **rapidly flash RED (100ms)** for 3 seconds to visually confirm the mesh identity has been erased.
-4.  The node will automatically reboot, restart discovery, and register the first new peers it hears as its new mesh family.
+2.  The RGB LED will **rapidly flash RED (100ms)** for 3 seconds to visually warn you that a reset is about to occur.
+3.  The node will automatically broadcast an emergency reset to the mesh, wipe its local identity, and reboot.
+4.  After reboot, the node will restart discovery and register the first new peers it hears as its new mesh family.
 
-> [!IMPORTANT]
 > To decommission a node, you should ideally run this reset on **all remaining nodes** so they stop looking for the removed MAC address.
+
+### 🚨 Emergency Network Reset (Safety Priority)
+A critical security and safety feature implemented to prevent "Stale Action Execution" during network re-initialization.
+
+**The Problem:**
+In a mesh, if a sensor node (Node C) is in an "ON" state and the actuator node (Node B) is factory reset and rebooted, Node B would normally receive Node C's next heartbeat and immediately turn its relay/LED back ON. In industrial or high-risk environments, a reset should always result in a **Zero-State** network for safety.
+
+When a node triggers a Factory Reset, it follows this strict **Safety Priority Sequence**:
+1.  **Visual Warning (3s):** The RGB LED rapidly flashes RED for 3 seconds to give the user a clear signal *before* any data is erased.
+2.  **Emergency Broadcast:** Once the timer expires, the node sends a `[ALL]CMD:NETWORK_RESET` signal to the entire mesh.
+3.  **Peer Override:** Nodes receiving this signal immediately kill their local physical outputs (Relays/LEDs set to 0) and call `sensors_force_initial_state()` to wipe their software memory.
+4.  **Local Wipe & Reboot:** Finally, the node wipes its own NVS memory and restarts, ensuring the entire mesh recovers in a synchronized "Zero-State."
 
 ### ⚡ Smart Flooding & Efficiency
 *   **Sequence Number Flooding:** Every packet includes a unique 32-bit sequence number. This allows all traffic (including identical heartbeats) to be rebroadcasted across multiple hops, making the network truly self-healing and dynamic.

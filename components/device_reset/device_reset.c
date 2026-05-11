@@ -33,11 +33,9 @@ static void device_reset_task(void *pvParameters)
 
             if (hold_count >= required_holds) {
                 ESP_LOGW(TAG, "Factory Reset Triggered!");
-                
-                // 1. Clear Mesh Data
-                mesh_manager_factory_reset();
 
-                // 2. Visual Confirmation: Rapidly flash the Disconnected (Red) state for 3 seconds
+                // STEP 1: Visual Warning — Rapidly flash RED for 3 seconds
+                // This gives the user a clear visual signal BEFORE anything is erased.
                 for (int i = 0; i < 15; i++) {
                     status_indicator_set_state(LED_STATE_DISCONNECTED);
                     vTaskDelay(pdMS_TO_TICKS(100));
@@ -45,7 +43,17 @@ static void device_reset_task(void *pvParameters)
                     vTaskDelay(pdMS_TO_TICKS(100));
                 }
 
-                // 3. Restart device to apply clean state
+                // STEP 2: Broadcast Emergency Reset to ALL other nodes
+                // Tells all peers to turn off their outputs and wipe their software states
+                // BEFORE this device leaves the network, ensuring a safe Zero-State.
+                extern void main_broadcast_emergency_reset(void);
+                main_broadcast_emergency_reset();
+                vTaskDelay(pdMS_TO_TICKS(500)); // Wait for peers to receive and process it
+
+                // STEP 3: Wipe local Mesh Identity from NVS
+                mesh_manager_factory_reset();
+
+                // STEP 4: Reboot to apply the clean state
                 ESP_LOGW(TAG, "Rebooting device...");
                 esp_restart();
             }
@@ -76,6 +84,8 @@ void device_reset_init(void)
     vTaskDelay(pdMS_TO_TICKS(50));
 
     // Create background task to monitor the button continuously
-    xTaskCreate(device_reset_task, "device_reset_task", 2048, NULL, 5, NULL);
+    // Stack set to 8192 bytes: the reset task calls into the full networking
+    // stack (message_provider -> espnow_control) which requires deep stack space.
+    xTaskCreate(device_reset_task, "device_reset_task", 8192, NULL, 5, NULL);
     ESP_LOGI(TAG, "Device reset task initialized.");
 }
